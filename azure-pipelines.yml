@@ -34,6 +34,6 @@ stages:
         command: buildAndPush
         repository: 'riteshkuldeep.azurecr.io/rkimg'
         dockerfile: '**/Dockerfile'
-        containerRegistry: 'myContainerRegistryServiceConnection'
+        containerRegistry: 'RiteshKuldeep'
         tags: |
           v1
