@@ -1,0 +1,39 @@
+# Docker
+# Build and push an image to Azure Container Registry
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+trigger:
+- main
+
+resources:
+- repo: self
+
+variables:
+  # Container registry service connection established during pipeline creation
+  dockerRegistryServiceConnection: 'cf8d9530-f460-40b3-bd50-bba420a58d4d'
+  imageRepository: 'rkimgv1'
+  containerRegistry: 'riteshkuldeep.azurecr.io'
+  dockerfilePath: '**/Dockerfile'
+  tag: 'v1'
+
+  # Agent VM image name
+  vmImageName: 'ubuntu-latest'
+
+stages:
+- stage: Build
+  displayName: Build and push stage
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: Docker@2
+      displayName: Build and push an image to container registry
+      inputs:
+        command: buildAndPush
+        repository: 'riteshkuldeep.azurecr.io/rkimg'
+        dockerfile: '**/Dockerfile'
+        containerRegistry: 'myContainerRegistryServiceConnection'
+        tags: |
+          v1
