@@ -5,10 +5,10 @@
 trigger:
 - main
 
-pool: rkagent
+
 resources:
 - repo: self
-
+pool: rkagent
 variables:
   # Container registry service connection established during pipeline creation
   dockerRegistryServiceConnection: 'cf8d9530-f460-40b3-bd50-bba420a58d4d'
