@@ -5,6 +5,7 @@
 trigger:
 - main
 
+pool: rkagent
 resources:
 - repo: self
 
