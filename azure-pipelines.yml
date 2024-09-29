@@ -1,0 +1,72 @@
+# Docker
+# Build and push an image to Azure Container Registry
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+trigger:
+- main
+
+resources:
+- repo: self
+
+variables:
+  # Container registry service connection established during pipeline creation
+  dockerRegistryServiceConnection: 'a5a2215b-06bb-4b83-aeed-79bf38294fae'
+  imageRepository: 'rkapp'
+  containerRegistry: 'dccloudriteshkuldeepcr.azurecr.io'
+  dockerfilePath: '**/Dockerfile'
+  tag: '$(Build.BuildId)'
+
+  # Agent VM image name
+  vmImageName: 'ubuntu-latest'
+
+# Step 4: Stages
+stages:
+
+# Step 4.1: Build Stage - Build the Docker image
+  - stage: Build
+    displayName: 'Build Docker Image'
+    jobs:
+      - job: Build
+        steps:
+          - task: Docker@2
+            displayName: 'Build Docker Image'
+            inputs:
+              containerRegistry: '$(containerRegistry)'
+              repository: '$(imageName)'
+              command: 'build'
+              Dockerfile: '**/Dockerfile'
+              tags: |
+                $(Build.BuildId)
+              addPipelineData: true
+
+# Step 4.2: Push Stage - Push the image to ACR
+  - stage: Push
+    displayName: 'Push Docker Image to ACR'
+    dependsOn: Build
+    jobs:
+      - job: Push
+        steps:
+          - task: Docker@2
+            displayName: 'Push Docker Image'
+            inputs:
+              containerRegistry: '$(containerRegistry)'
+              repository: '$(imageName)'
+              command: 'push'
+              tags: |
+                $(Build.BuildId)
+
+# Step 4.3: Deploy Stage - Deploy the image from ACR to Azure App Service
+  - stage: Deploy
+    displayName: 'Deploy to Azure App Service'
+    dependsOn: Push
+    jobs:
+      - job: Deploy
+        steps:
+          - task: AzureWebAppContainer@1
+            displayName: 'Deploy Image to Azure App Service'
+            inputs:
+              azureSubscription: 'Azure for Students(4d562ae5-df23-4ad1-83a1-513e113a22fb)'
+              appName: 'riteshkuldeepwebapp'
+   #           imageName: '$(containerRegistry)/$(imageName):$(Build.BuildId)'
+              containers: '$(containerRegistry)/$(imageRepository):$(tag)'
+              resourceGroupName: '$(resourceGroupName)'
